@@ -44,19 +44,33 @@ function showToast() {
 
 
 // ==========================================
-// 3. LOGIKA MEMBACA FILE (UPLOAD)
+// 3. LOGIKA MEMBACA FILE (UPLOAD) - DENGAN PENCEGAH DUPLIKAT
 // ==========================================
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    fileStatus.textContent = file.name;
-    fileStatus.classList.add('text-brand-600', 'font-medium');
-
     const reader = new FileReader();
     reader.onload = function(event) {
         const text = event.target.result;
-        parsedNames = text.split(/\r?\n/).map(name => name.trim()).filter(name => name !== "");
+        
+        // 1. Ambil semua nama (termasuk yang ganda)
+        const rawNames = text.split(/\r?\n/).map(name => name.trim()).filter(name => name !== "");
+        
+        // 2. Hapus duplikat otomatis menggunakan Set()
+        parsedNames = [...new Set(rawNames)];
+        
+        // 3. Hitung jumlah duplikat yang terdeteksi
+        const duplicateCount = rawNames.length - parsedNames.length;
+
+        // 4. Tampilkan pemberitahuan kecil di UI jika ada duplikat yang dihapus
+        if (duplicateCount > 0) {
+            fileStatus.textContent = `${file.name} (${duplicateCount} nama ganda dihapus otomatis)`;
+        } else {
+            fileStatus.textContent = file.name;
+        }
+        fileStatus.classList.add('text-brand-600', 'font-medium');
+
         updateNamePreview();
     };
     reader.readAsText(file);
