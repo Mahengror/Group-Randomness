@@ -231,6 +231,9 @@ function stopLoadingState() {
     resultsContainer.classList.remove('opacity-30');
 }
 
+// VARIABEL BARU UNTUK MENYIMPAN ITEM YANG SEDANG DITARIK
+let draggedItem = null;
+
 function processAndRenderGroups(inputValue, mode) {
     let shuffledNames = [...parsedNames];
     for (let i = shuffledNames.length - 1; i > 0; i--) {
@@ -239,20 +242,138 @@ function processAndRenderGroups(inputValue, mode) {
     }
 
     let groups = [];
-
-    // PERHITUNGAN BERDASARKAN MODE YANG DIPILIH
     if (mode === 'groupCount') {
-        // Mode 1: Dibagi rata ke sejumlah N kelompok (Round-Robin)
         groups = Array.from({ length: inputValue }, () => []);
         shuffledNames.forEach((name, index) => {
             groups[index % inputValue].push(name);
         });
     } else if (mode === 'memberCount') {
-        // Mode 2: Dipotong-potong sejumlah N anggota per kelompok
         for (let i = 0; i < shuffledNames.length; i += inputValue) {
             groups.push(shuffledNames.slice(i, i + inputValue));
         }
     }
+
+    resultsContainer.innerHTML = "";
+    generatedTextOutput = "";
+    generatedGroupsData = groups; 
+
+    groups.forEach((group, index) => {
+        generatedTextOutput += `Kelompok ${index + 1} - ${group.length} orang\n`;
+        group.forEach(name => {
+            generatedTextOutput += `- ${name}\n`;
+        });
+        generatedTextOutput += `\n`;
+
+        let listHTML = "";
+        group.forEach(name => {
+            // Tambahkan attribute draggable="true" dan class untuk kursor
+            listHTML += `<li class="draggable-item cursor-grab active:cursor-grabbing flex items-start gap-2 before:content-['•'] before:text-brand-400 before:font-bold text-sm text-slate-700 hover:bg-slate-50 rounded p-1 transition-colors -ml-1" draggable="true">${name}</li>`;
+        });
+
+        const card = document.createElement('div');
+        // Tambahkan class penanda 'group-card'
+        card.className = "group-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-slate-200 opacity-0 animate-fade-in-up transition-all";
+        card.style.animationDelay = `${index * 0.1}s`; 
+
+        card.innerHTML = `
+            <div class="bg-brand-50 border-b border-slate-100 px-5 py-3 flex items-center justify-between transition-colors duration-300">
+                <h3 class="font-bold text-brand-700">Kelompok <span class="group-number">${index + 1}</span></h3>
+                <span class="member-count bg-brand-200 text-brand-800 px-2 py-1 rounded-full text-xs font-semibold">${group.length} orang</span>
+            </div>
+            <div class="drop-zone-container p-5 flex-1 transition-colors duration-300 rounded-b-2xl">
+                <!-- Area ul menjadi target drop (drop-zone) dengan min-height agar tidak hilang jika kosong -->
+                <ul class="drop-zone space-y-2 min-h-[50px] h-full">
+                    ${listHTML}
+                </ul>
+            </div>
+        `;
+        resultsContainer.appendChild(card);
+    });
+
+    copyBtn.classList.remove('hidden');
+    downloadExcelBtn.classList.remove('hidden');
+
+    // AKTIFKAN FITUR DRAG AND DROP
+    attachGroupDragAndDrop();
+}
+
+// ==========================================
+// FUNGSI BARU: DRAG & DROP & SINKRONISASI
+// ==========================================
+function attachGroupDragAndDrop() {
+    const draggables = document.querySelectorAll('.draggable-item');
+    const dropZones = document.querySelectorAll('.drop-zone');
+
+    // 1. Event untuk nama yang diseret (Item)
+    draggables.forEach(draggable => {
+        draggable.addEventListener('dragstart', function() {
+            draggedItem = this;
+            // Bikin agak transparan biar efeknya melayang
+            setTimeout(() => this.classList.add('opacity-50'), 0);
+        });
+        
+        draggable.addEventListener('dragend', function() {
+            this.classList.remove('opacity-50');
+            draggedItem = null;
+            
+            // Sinkronkan data saat nama selesai dijatuhkan
+            syncDataFromUI();
+        });
+    });
+
+    // 2. Event untuk area penerima (Kotak Kelompok)
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', function(e) {
+            e.preventDefault(); // Wajib agar HTML5 mengizinkan drop
+            // Beri highlight warna saat nama melayang di atasnya
+            this.parentElement.classList.add('bg-brand-100', 'ring-2', 'ring-brand-500');
+        });
+
+        zone.addEventListener('dragleave', function() {
+            // Hapus highlight jika kursor keluar area
+            this.parentElement.classList.remove('bg-brand-100', 'ring-2', 'ring-brand-500');
+        });
+
+        zone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.parentElement.classList.remove('bg-brand-100', 'ring-2', 'ring-brand-500');
+            
+            // Pindahkan elemen nama ke kelompok baru
+            if (draggedItem) {
+                this.appendChild(draggedItem);
+            }
+        });
+    });
+}
+
+function syncDataFromUI() {
+    const groupCards = document.querySelectorAll('.group-card');
+    generatedGroupsData = [];
+    generatedTextOutput = "";
+
+    groupCards.forEach((card, index) => {
+        const items = card.querySelectorAll('.draggable-item');
+        const countBadge = card.querySelector('.member-count');
+
+        let currentNames = [];
+        items.forEach(item => {
+            currentNames.push(item.textContent.trim());
+        });
+
+        // 1. Update jumlah lencana secara otomatis
+        countBadge.textContent = `${currentNames.length} orang`;
+
+        // 2. Update array data untuk fitur Excel
+        generatedGroupsData.push(currentNames);
+
+        // 3. Update teks panjang untuk fitur Copy
+        generatedTextOutput += `Kelompok ${index + 1} - ${currentNames.length} orang\n`;
+        currentNames.forEach(name => {
+            generatedTextOutput += `- ${name}\n`;
+        });
+        generatedTextOutput += `\n`;
+    });
+}
 
     resultsContainer.innerHTML = "";
     generatedTextOutput = "";
