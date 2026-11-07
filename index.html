@@ -30,9 +30,7 @@
                 'font-bold', 'text-brand-700', 'font-semibold', 'bg-brand-200', 'text-brand-800', 'px-2', 'py-1', 'rounded-full',
                 'p-5', 'flex-1', 'space-y-2', 'items-start', 'gap-2', 'before:content-["•"]', 'before:text-brand-400', 'before:font-bold',
                 'animate-fade-in-up', 'opacity-0', 'justify-between', 'group', 'group-hover:opacity-100', 'hover:text-red-500', 'hover:bg-red-50', 'p-1.5', 'min-w-[24px]', 'text-amber-300', 'text-amber-600',
-                
-                /* Class BARU untuk Drag & Drop antar Kelompok */
-                'cursor-grab', 'active:cursor-grabbing', 'ring-2', 'ring-brand-500', 'min-h-[50px]', 'bg-brand-100', 'opacity-50'
+                'cursor-grab', 'active:cursor-grabbing', 'ring-2', 'ring-brand-500', 'min-h-[50px]', 'bg-brand-100', 'opacity-50', 'text-left'
             ],
             theme: {
                 extend: {
@@ -47,9 +45,9 @@
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col">
 
-    <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">
         <!-- Header -->
         <header class="text-center mb-10">
             <div class="inline-flex items-center justify-center p-1 bg-brand-100 rounded-full mb-4 text-brand-600 overflow-hidden">
@@ -63,7 +61,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- Left Column: Controls & Input -->
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-1 space-y-6 text-left">
                 <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                     
                     <!-- File Upload -->
@@ -88,16 +86,11 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-slate-700 mb-2">2. Pengaturan Kelompok</label>
                         <div class="flex flex-col gap-3">
-                            <!-- Dropdown Pilihan Mode -->
-                            <select id="groupMode" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 bg-white">
+                            <select id="groupMode" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
                                 <option value="groupCount">Bagi berdasarkan "Jumlah Kelompok"</option>
                                 <option value="memberCount">Bagi berdasarkan "Anggota per Kelompok"</option>
                             </select>
-                            
-                            <!-- Input Angka -->
-                            <input type="number" id="groupCount" min="1" placeholder="Contoh: 5" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500">
-                            
-                            <!-- Teks Bantuan -->
+                            <input type="number" id="groupCount" min="1" placeholder="Contoh: 5" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500">
                             <p id="groupHelpText" class="text-xs text-slate-500">Tentukan sistem ingin membuat berapa kelompok.</p>
                         </div>
                     </div>
@@ -108,16 +101,13 @@
                     <!-- Action Buttons -->
                     <div class="space-y-3">
                         <button id="generateBtn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-md flex justify-center items-center gap-2 relative">
-                            <!-- Ikon Panah (Default) -->
                             <svg id="generateIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
-                            <!-- Ikon Loading (Spinner - disembunyikan default) -->
                             <svg id="loadingIcon" class="animate-spin hidden w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <!-- Teks Tombol -->
                             <span id="generateText">Bagi Kelompok</span>
                         </button>
                         
@@ -145,29 +135,28 @@
             </div>
 
             <!-- Right Column: Results -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 min-h-[500px]">
-                    <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                        <h2 class="text-xl font-bold text-slate-800">Hasil Pembagian Kelompok</h2>
+            <div class="lg:col-span-2 text-left">
+                <!-- Wrapper Box Hasil -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 min-h-[500px] flex flex-col">
+                    
+                    <!-- Header Hasil (Kiri Judul, Kanan Tombol) -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-slate-100 pb-4 gap-4 w-full">
+                        <h2 class="text-xl font-bold text-slate-800 m-0">Hasil Pembagian Kelompok</h2>
                         
-                        <div class="flex items-center gap-4">
-                            <!-- Tombol Salin -->
+                        <!-- Grup Tombol -->
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-4">
                             <button id="copyBtn" class="hidden text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
                                 </svg>
                                 Salin
                             </button>
-                            
-                            <!-- Tombol Excel -->
                             <button id="downloadExcelBtn" class="hidden text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                 </svg>
                                 Excel
                             </button>
-
-                            <!-- Tombol Gambar Baru -->
                             <button id="downloadImageBtn" class="hidden text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center gap-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
@@ -175,30 +164,32 @@
                                 Gambar
                             </button>
                         </div>
+                    </div>
 
-                    <!-- Groups Grid Container -->
-                    <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300">
-                        <!-- Empty State -->
-                        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+                    <!-- Groups Grid Container (Dimulai dari Kiri) -->
+                    <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300 w-full justify-items-start items-start content-start flex-1">
+                        
+                        <!-- Empty State (Berada tepat di tengah w-full) -->
+                        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                             </svg>
                             <p>Belum ada kelompok yang dibagikan.</p>
                         </div>
+
                     </div>
                 </div>
             </div>
             
         </div>
-    </div>
 
-    <!-- Footer -->
-        <footer class="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
+        <!-- Footer Section (Sesuai Permintaan) -->
+        <footer class="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-sm w-full">
             <!-- Bagian Credit -->
             <div class="text-slate-500 text-center md:text-left">
                 <p>
                     Developed by <a href="https://github.com/Mahengror" target="_blank" class="font-semibold text-slate-700 hover:text-brand-600 transition-colors">Mahengror</a> 
-                    & Designed with <span class="font-semibold text-brand-600">Gemini AI</span> 
+                    & Designed with <span class="font-semibold text-brand-600">Gemini AI</span> ✨
                 </p>
             </div>
             
@@ -208,7 +199,9 @@
                 <a href="https://github.com/Mahengror" target="_blank" class="hover:text-slate-900 transition-colors">GitHub</a>
             </div>
         </footer>
-    
+
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 z-50 pointer-events-none">
         <span id="toastMsg">Teks disalin!</span>
