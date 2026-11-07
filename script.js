@@ -4,7 +4,7 @@
 let parsedNames = [];
 let generatedGroupsData = [];
 let generatedTextOutput = "";
-let draggedItem = null; // Variabel untuk menyimpan nama yang digeser (Drag & Drop)
+let draggedItem = null; 
 
 const fileInput = document.getElementById('fileInput');
 const fileStatus = document.getElementById('fileStatus');
@@ -21,6 +21,7 @@ const errorMessage = document.getElementById('errorMessage');
 const resultsContainer = document.getElementById('resultsContainer');
 const copyBtn = document.getElementById('copyBtn');
 const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+const downloadImageBtn = document.getElementById('downloadImageBtn'); // DOM Baru untuk Gambar
 const toast = document.getElementById('toast');
 const dropZone = document.getElementById('dropZone');
 
@@ -69,8 +70,11 @@ groupMode.addEventListener('change', () => {
             <p>Mode diubah. Silakan masukkan angka baru dan klik "Bagi Kelompok".</p>
         </div>
     `;
+    
+    // Sembunyikan semua tombol export
     copyBtn.classList.add('hidden');
     downloadExcelBtn.classList.add('hidden');
+    if(downloadImageBtn) downloadImageBtn.classList.add('hidden'); 
     hideError();
 });
 
@@ -118,7 +122,6 @@ function updateNamePreview() {
                 <span class="min-w-[24px] h-6 flex justify-center items-center bg-slate-200 text-slate-500 rounded-md text-xs font-medium">${index + 1}</span>
                 <span class="truncate" title="${name}">${name}</span>
             </div>
-            <!-- Tombol Hapus -->
             <button class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100" onclick="removeName(${index})" title="Hapus nama ini">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -143,8 +146,11 @@ window.removeName = function(index) {
                 <p class="text-sm mt-1 text-center">Ada nama yang baru saja dihapus.<br>Silakan klik tombol <b>"Bagi Kelompok"</b> lagi untuk memperbarui hasil.</p>
             </div>
         `;
+        
         copyBtn.classList.add('hidden');
         downloadExcelBtn.classList.add('hidden');
+        if(downloadImageBtn) downloadImageBtn.classList.add('hidden');
+        
         generatedGroupsData = [];
         generatedTextOutput = "";
     }
@@ -235,10 +241,14 @@ function processAndRenderGroups(inputValue, mode) {
         resultsContainer.appendChild(card);
     });
 
-    syncDataFromUI(); // Buat output Copy & Excel untuk pertama kali
+    syncDataFromUI(); 
+    
+    // Munculkan semua tombol export
     copyBtn.classList.remove('hidden');
     downloadExcelBtn.classList.remove('hidden');
-    attachGroupDragAndDrop(); // Aktifkan Drag & Drop
+    if(downloadImageBtn) downloadImageBtn.classList.remove('hidden');
+
+    attachGroupDragAndDrop(); 
 }
 
 // ==========================================
@@ -256,7 +266,7 @@ function attachGroupDragAndDrop() {
         draggable.addEventListener('dragend', function() {
             this.classList.remove('opacity-50');
             draggedItem = null;
-            syncDataFromUI(); // Sinkron data stlh drag selesai
+            syncDataFromUI(); 
         });
     });
 
@@ -302,7 +312,7 @@ function syncDataFromUI() {
 }
 
 // ==========================================
-// 7. COPY, EXCEL, & RESET
+// 7. COPY, EXCEL, & GAMBAR
 // ==========================================
 copyBtn.addEventListener('click', () => {
     if (generatedTextOutput) {
@@ -332,10 +342,42 @@ downloadExcelBtn.addEventListener('click', () => {
     XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
+if(downloadImageBtn) {
+    downloadImageBtn.addEventListener('click', () => {
+        if (generatedGroupsData.length === 0) return;
+
+        const originalContent = downloadImageBtn.innerHTML;
+        downloadImageBtn.innerHTML = "Memproses...";
+        
+        html2canvas(resultsContainer, {
+            backgroundColor: "#ffffff", 
+            scale: 2 
+        }).then(canvas => {
+            const imageURL = canvas.toDataURL("image/png");
+            const downloadLink = document.createElement('a');
+            downloadLink.href = imageURL;
+            downloadLink.download = "Hasil_Kelompok.png";
+            
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            downloadImageBtn.innerHTML = originalContent;
+        }).catch(err => {
+            alert("Gagal membuat gambar: " + err);
+            downloadImageBtn.innerHTML = originalContent;
+        });
+    });
+}
+
+// ==========================================
+// 8. RESET DATA
+// ==========================================
 resetBtn.addEventListener('click', () => {
     parsedNames = [];
     generatedGroupsData = [];
     generatedTextOutput = "";
+    
     fileInput.value = ""; 
     fileStatus.textContent = "Belum ada file terpilih";
     fileStatus.classList.remove('text-brand-600', 'font-medium');
@@ -355,12 +397,14 @@ resetBtn.addEventListener('click', () => {
             <p>Belum ada kelompok yang dibagikan.</p>
         </div>
     `;
+    
     copyBtn.classList.add('hidden');
     downloadExcelBtn.classList.add('hidden');
+    if(downloadImageBtn) downloadImageBtn.classList.add('hidden');
 });
 
 // ==========================================
-// 8. UPLOAD FILE DRAG AND DROP (AREA KIRI)
+// 9. UPLOAD FILE DRAG AND DROP (AREA KIRI)
 // ==========================================
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     window.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
