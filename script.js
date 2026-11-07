@@ -1,6 +1,8 @@
 // Deklarasi Variabel Global
 let parsedNames = [];
 let generatedTextOutput = "";
+let generatedGroupsData = [];
+const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 
 // Element DOM
 const fileInput = document.getElementById('fileInput');
@@ -129,8 +131,12 @@ function processAndRenderGroups(groupCount) {
         resultsContainer.appendChild(card);
     });
 
-    // Tampilkan tombol Salin Hasil
+    // Simpan data kelompok ke variabel global untuk Excel
+    generatedGroupsData = groups;
+
+    // Tampilkan tombol aksi
     copyBtn.classList.remove('hidden');
+    downloadExcelBtn.classList.remove('hidden');
 }
 
 // Event 3: Fitur Salin Teks
@@ -142,6 +148,39 @@ copyBtn.addEventListener('click', () => {
             alert("Gagal menyalin teks: " + err);
         });
     }
+});
+
+// Event 4: Fitur Download Excel
+downloadExcelBtn.addEventListener('click', () => {
+    if (generatedGroupsData.length === 0) return;
+
+    // 1. Siapkan struktur data untuk Excel (Array 2 Dimensi)
+    const excelData = [];
+    
+    // 2. Buat Header (Baris pertama: Kelompok 1, Kelompok 2, dst)
+    const headers = generatedGroupsData.map((_, index) => `Kelompok ${index + 1}`);
+    excelData.push(headers);
+
+    // 3. Cari kelompok dengan jumlah anggota terbanyak untuk menentukan jumlah baris
+    const maxMembers = Math.max(...generatedGroupsData.map(group => group.length));
+
+    // 4. Masukkan nama-nama anggota ke baris yang sesuai di bawah kolom kelompoknya
+    for (let i = 0; i < maxMembers; i++) {
+        const row = [];
+        for (let j = 0; j < generatedGroupsData.length; j++) {
+            // Jika ada nama, masukkan. Jika kelompok sudah habis anggotanya, isi string kosong
+            row.push(generatedGroupsData[j][i] || "");
+        }
+        excelData.push(row);
+    }
+
+    // 5. Proses pembuatan file Excel menggunakan SheetJS
+    const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Hasil Pembagian");
+
+    // 6. Trigger unduhan file
+    XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
 // Fungsi Bantuan UI
