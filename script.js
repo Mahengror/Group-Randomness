@@ -261,3 +261,53 @@ dropZone.addEventListener('drop', (e) => {
         }
     }
 });
+
+// ==========================================
+// FITUR RESET DATA
+// ==========================================
+
+const resetBtn = document.getElementById('resetBtn');
+
+resetBtn.addEventListener('click', () => {
+    // 1. Bersihkan Variabel Global
+    parsedNames = [];
+    generatedGroupsData = [];
+    generatedTextOutput = "";
+
+    // 2. Reset Input File HTML
+    fileInput.value = ""; 
+    
+    // 3. Reset Teks Status Upload ke semula
+    fileStatus.textContent = "Belum ada file terpilih";
+    fileStatus.classList.remove('text-brand-600', 'font-medium');
+
+    // 4. Kosongkan Kolom Input Jumlah Kelompok
+    groupCountInput.value = "";
+
+    // 5. Sembunyikan Pesan Error (jika sedang tampil)
+    hideError();
+
+    // 6. Reset Daftar Nama di Kolom Kiri
+    nameCount.textContent = "0 nama";
+    nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>`;
+
+    // 7. Reset Area Hasil di Kolom Kanan
+    resultsContainer.innerHTML = `
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+            <p>Belum ada kelompok yang dibagikan.</p>
+            <p class="text-sm">Silakan upload daftar nama dan klik "Bagi Kelompok".</p>
+        </div>
+    `;
+
+    // 8. Sembunyikan Kembali Tombol Salin dan Excel
+    copyBtn.classList.add('hidden');
+    
+    // Pastikan tombol Excel juga disembunyikan (pastikan elemennya terdeteksi)
+    const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+    if (downloadExcelBtn) {
+        downloadExcelBtn.classList.add('hidden');
+    }
+});
