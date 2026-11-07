@@ -6,7 +6,7 @@ Live Demo: https://mahengror.github.io/Group-Randomness/
 
 Fitur Utama
 1. Upload file (.txt) secara instan.
-2. Pengacakan sangat adil! Tidak ada istilah "disetting.
+2. Pengacakan sangat adil! Tidak ada istilah "disetting".
 3. UI yang bersih dan elegan serta mendukung mobile maupun dekstop.
 4. Semua privasi mu aman.
 
