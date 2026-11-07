@@ -116,20 +116,64 @@ function updateNamePreview() {
     nameList.innerHTML = ""; 
 
     if (parsedNames.length === 0) {
-        nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">File kosong atau format salah.</li>`;
+        nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">File kosong atau semua nama telah dihapus.</li>`;
         return;
     }
 
     parsedNames.forEach((name, index) => {
         const li = document.createElement('li');
-        li.className = "py-2.5 px-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-sm flex items-center gap-3 transition-colors hover:bg-slate-100";
+        // Tambahkan class 'justify-between' dan 'group' untuk mendeteksi kursor
+        li.className = "py-2 px-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-sm flex items-center justify-between transition-colors hover:bg-slate-100 group";
+        
         li.innerHTML = `
-            <span class="w-6 h-6 flex justify-center items-center bg-slate-200 text-slate-500 rounded-md text-xs font-medium">${index + 1}</span>
-            <span class="truncate">${name}</span>
+            <div class="flex items-center gap-3 overflow-hidden">
+                <span class="min-w-[24px] h-6 flex justify-center items-center bg-slate-200 text-slate-500 rounded-md text-xs font-medium">${index + 1}</span>
+                <span class="truncate" title="${name}">${name}</span>
+            </div>
+            
+            <!-- Tombol Hapus (Silang) -->
+            <button class="text-slate-400 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all opacity-0 group-hover:opacity-100" onclick="removeName(${index})" title="Hapus nama ini">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
         `;
         nameList.appendChild(li);
     });
 }
+
+// ==========================================
+// FUNGSI BARU: HAPUS NAMA MANUAL
+// ==========================================
+window.removeName = function(index) {
+    // 1. Hapus 1 nama dari array berdasarkan posisinya
+    parsedNames.splice(index, 1);
+    
+    // 2. Perbarui tampilan daftar nama di sebelah kiri
+    updateNamePreview();
+
+    // 3. Jika pengguna menghapus nama SETELAH hasil kelompok dimunculkan,
+    // kita beri peringatan agar mereka mengacak ulang.
+    if (generatedGroupsData.length > 0) {
+        resultsContainer.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 animate-fade-in-up">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mb-4 text-amber-300">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <p class="text-amber-600 font-semibold">Daftar Nama Telah Diubah!</p>
+                <p class="text-sm mt-1 text-center">Ada nama yang baru saja dihapus.<br>Silakan klik tombol <b>"Bagi Kelompok"</b> lagi untuk memperbarui hasil.</p>
+            </div>
+        `;
+        
+        // Sembunyikan tombol Salin & Excel karena data sebelumnya sudah tidak valid
+        copyBtn.classList.add('hidden');
+        downloadExcelBtn.classList.add('hidden');
+        
+        // Kosongkan memori hasil
+        generatedGroupsData = [];
+        generatedTextOutput = "";
+    }
+};
 
 
 // ==========================================
