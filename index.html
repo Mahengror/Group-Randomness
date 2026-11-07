@@ -12,11 +12,13 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
 
+    <!-- SheetJS untuk Export Excel -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            // Mendaftarkan class dari script.js agar tidak diabaikan oleh Tailwind CDN
             safelist: [
                 'py-2.5', 'px-4', 'bg-slate-50', 'rounded-xl', 'border', 'border-slate-200', 'text-slate-700', 'text-sm', 'flex', 'items-center', 'gap-3', 'transition-colors', 'hover:bg-slate-100',
                 'w-6', 'h-6', 'justify-center', 'bg-slate-200', 'text-slate-500', 'rounded-md', 'text-xs', 'font-medium', 'truncate',
@@ -32,19 +34,13 @@
                     },
                     colors: {
                         brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- SheetJS untuk Export Excel -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
 
@@ -52,7 +48,7 @@
         <!-- Header -->
         <header class="text-center mb-10">
             <div class="inline-flex items-center justify-center p-1 bg-brand-100 rounded-full mb-4 text-brand-600 overflow-hidden">
-                <img src="assets/user.jpg" alt="Logo" class="w-12 h-12 rounded-full object-cover">
+                <img src="assets/user.jpg" alt="Logo" class="w-12 h-12 rounded-full object-cover" onerror="this.src='https://ui-avatars.com/api/?name=User&background=dbeafe&color=2563eb'">
             </div>
             <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-2">Pembagi Kelompok Acak</h1>
             <p class="text-slate-500 max-w-2xl mx-auto">Upload file .txt berisi daftar nama (satu nama per baris), tentukan jumlah kelompok, dan biarkan sistem mengacaknya secara adil.</p>
@@ -70,16 +66,16 @@
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-slate-700 mb-2">1. Upload Daftar Nama (.txt)</label>
                         <div id="dropZone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-brand-500 transition-colors bg-slate-50 relative group cursor-pointer" onclick="document.getElementById('fileInput').click()">
-                            <div class="space-y-1 text-center">
+                            <div class="space-y-1 text-center pointer-events-none">
                                 <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-brand-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 <div class="flex text-sm text-slate-600 justify-center">
-                                    <label for="fileInput" class="relative cursor-pointer rounded-md font-medium text-brand-600 hover:text-brand-500 focus-within:outline-none">
-                                        <span>Pilih File</span>
-                                        <input id="fileInput" name="fileInput" type="file" accept=".txt" class="sr-only">
-                                    </label>
-                                    <p class="pl-1">atau klik di sini</p>
+                                    <span class="relative rounded-md font-medium text-brand-600 group-hover:text-brand-500">
+                                        Pilih File
+                                    </span>
+                                    <input id="fileInput" name="fileInput" type="file" accept=".txt" class="sr-only">
+                                    <p class="pl-1">atau tarik ke sini</p>
                                 </div>
                                 <p class="text-xs text-slate-500" id="fileStatus">Belum ada file terpilih</p>
                             </div>
@@ -93,17 +89,24 @@
                     </div>
 
                     <!-- Error Message Box -->
-                    <div id="errorMessage" class="hidden mb-4 p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200">
-                        <!-- Error text will appear here -->
-                    </div>
+                    <div id="errorMessage" class="hidden mb-4 p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200"></div>
 
-                    <!-- Action Button -->
-                    <button id="generateBtn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-md hover:shadow-lg flex justify-center items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                        Bagi Kelompok
-                    </button>
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        <button id="generateBtn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                            </svg>
+                            Bagi Kelompok
+                        </button>
+                        
+                        <button id="resetBtn" class="w-full bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex justify-center items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                            </svg>
+                            Reset Data
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Name List Preview -->
@@ -114,7 +117,6 @@
                     </div>
                     <div class="flex-1 overflow-y-auto pr-2">
                         <ul id="nameList" class="space-y-2">
-                            <!-- List of names will be generated here -->
                             <li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>
                         </ul>
                     </div>
@@ -127,7 +129,6 @@
                     <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                         <h2 class="text-xl font-bold text-slate-800">Hasil Pembagian Kelompok</h2>
                         
-                        <!-- Wadah untuk tombol-tombol aksi -->
                         <div class="flex items-center gap-4">
                             <button id="copyBtn" class="hidden text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -135,8 +136,6 @@
                                 </svg>
                                 Salin
                             </button>
-                            
-                            <!-- Tombol Download Excel Baru -->
                             <button id="downloadExcelBtn" class="hidden text-green-600 hover:text-green-700 text-sm font-medium flex items-center gap-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -163,7 +162,7 @@
         </div>
     </div>
 
-    <!-- Notification Toast (for copy action) -->
+    <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 z-50 pointer-events-none">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-400">
             <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
