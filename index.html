@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembagi Kelompok Otomatis</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="inline-flex items-center justify-center p-3 bg-brand-100 rounded-full mb-4 text-brand-600">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-2">Pembagi Kelompok Acak</h1>
+            <p class="text-slate-500 max-w-2xl mx-auto">Upload file .txt berisi daftar nama (satu nama per baris), tentukan jumlah kelompok, dan biarkan sistem mengacaknya secara adil.</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Controls & Input -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Card Input -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    
+                    <!-- File Upload -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">1. Upload Daftar Nama (.txt)</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-brand-500 transition-colors bg-slate-50 relative group cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-brand-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-slate-600 justify-center">
+                                    <label for="fileInput" class="relative cursor-pointer rounded-md font-medium text-brand-600 hover:text-brand-500 focus-within:outline-none">
+                                        <span>Pilih File</span>
+                                        <input id="fileInput" name="fileInput" type="file" accept=".txt" class="sr-only">
+                                    </label>
+                                    <p class="pl-1">atau drag & drop</p>
+                                </div>
+                                <p class="text-xs text-slate-500" id="fileStatus">Belum ada file terpilih</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Number of Groups -->
+                    <div class="mb-6">
+                        <label for="groupCount" class="block text-sm font-medium text-slate-700 mb-2">2. Jumlah Kelompok</label>
+                        <input type="number" id="groupCount" min="1" placeholder="Contoh: 5" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-shadow">
+                    </div>
+
+                    <!-- Error Message Box -->
+                    <div id="errorMessage" class="hidden mb-4 p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200">
+                        <!-- Error text will appear here -->
+                    </div>
+
+                    <!-- Action Button -->
+                    <button id="generateBtn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        Bagi Kelompok
+                    </button>
+                </div>
+
+                <!-- Name List Preview -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-slate-800">Daftar Nama</h2>
+                        <span id="nameCount" class="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">0 nama</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto pr-2">
+                        <ul id="nameList" class="space-y-2">
+                            <!-- List of names will be generated here -->
+                            <li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Hasil Pembagian Kelompok</h2>
+                        <button id="copyBtn" class="hidden text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                            </svg>
+                            Salin Hasil
+                        </button>
+                    </div>
+
+                    <!-- Groups Grid Container -->
+                    <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Empty State -->
+                        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                            </svg>
+                            <p>Belum ada kelompok yang dibagikan.</p>
+                            <p class="text-sm">Silakan upload daftar nama dan klik "Bagi Kelompok".</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Notification Toast (for copy action) -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 z-50 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-400">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+        </svg>
+        <span id="toastMsg">Teks disalin!</span>
+    </div>
+
+    <script>
+        // Global State
+        let namesList = [];
+        let groupedResults = [];
+
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const fileStatus = document.getElementById('fileStatus');
+        const nameListEl = document.getElementById('nameList');
+        const nameCountEl = document.getElementById('nameCount');
+        const groupCountInput = document.getElementById('groupCount');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const copyBtn = document.getElementById('copyBtn');
+        const toast = document.getElementById('toast');
+
+        // File Upload Handler
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Check extension
+            if (!file.name.endsWith('.txt')) {
+                showError('Tolong upload file dengan format .txt');
+                return;
+            }
+
+            fileStatus.textContent = file.name;
+            hideError();
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const text = event.target.result;
+                // Parse text: split by newline, trim whitespace, remove empty lines
+                namesList = text.split(/\r?\n/)
+                                .map(name => name.trim())
+                                .filter(name => name.length > 0);
+                
+                renderNameList();
+            };
+            reader.onerror = function() {
+                showError('Gagal membaca file.');
+            };
+            reader.readAsText(file);
+        });
+
+        // Render uploaded names in the preview panel
+        function renderNameList() {
+            nameListEl.innerHTML = '';
+            nameCountEl.textContent = `${namesList.length} nama`;
+
+            if (namesList.length === 0) {
+                nameListEl.innerHTML = '<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">File kosong atau tidak berisi teks yang valid.</li>';
+                return;
+            }
+
+            // Create list items
+            namesList.forEach((name, index) => {
+                const li = document.createElement('li');
+                li.className = 'py-2.5 px-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-sm flex items-center gap-3 transition-colors hover:bg-slate-100';
+                
+                const badge = document.createElement('span');
+                badge.className = 'w-6 h-6 flex items-center justify-center bg-slate-200 text-slate-500 rounded-md text-xs font-medium';
+                badge.textContent = index + 1;
+                
+                const nameText = document.createElement('span');
+                nameText.className = 'font-medium truncate';
+                nameText.textContent = name;
+
+                li.appendChild(badge);
+                li.appendChild(nameText);
+                nameListEl.appendChild(li);
+            });
+        }
+
+        // Fisher-Yates Shuffle Algorithm
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            
+            // While there remain elements to shuffle.
+            while (currentIndex !== 0) {
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Generate Groups Logic
+        generateBtn.addEventListener('click', function() {
+            const groupCountStr = groupCountInput.value;
+            const groupCount = parseInt(groupCountStr);
+
+            // Validation
+            if (namesList.length === 0) {
+                showError('Silakan upload file .txt berisi daftar nama terlebih dahulu.');
+                return;
+            }
+            if (!groupCountStr || isNaN(groupCount) || groupCount < 1) {
+                showError('Masukkan jumlah kelompok yang valid (minimal 1).');
+                return;
+            }
+            if (groupCount > namesList.length) {
+                showError(`Jumlah kelompok (${groupCount}) tidak boleh lebih besar dari total nama (${namesList.length}).`);
+                return;
+            }
+
+            hideError();
+
+            // 1. Copy and Shuffle the names
+            const shuffledNames = shuffleArray([...namesList]);
+            
+            // 2. Initialize empty groups
+            groupedResults = Array.from({ length: groupCount }, () => []);
+
+            // 3. Distribute names evenly
+            // Using modulo operator guarantees even distribution of remainder
+            for (let i = 0; i < shuffledNames.length; i++) {
+                groupedResults[i % groupCount].push(shuffledNames[i]);
+            }
+
+            // 4. Render Results
+            renderResults();
+        });
+
+        // Render Results in Cards
+        function renderResults() {
+            resultsContainer.innerHTML = '';
+            
+            if (groupedResults.length > 0) {
+                copyBtn.classList.remove('hidden');
+            }
+
+            groupedResults.forEach((group, index) => {
+                // Card container
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col';
+                
+                // Card Header
+                const header = document.createElement('div');
+                header.className = 'bg-brand-50 border-b border-slate-100 px-5 py-3 flex justify-between items-center';
+                
+                const title = document.createElement('h3');
+                title.className = 'font-bold text-brand-700';
+                title.textContent = `Kelompok ${index + 1}`;
+                
+                const countBadge = document.createElement('span');
+                countBadge.className = 'text-xs font-semibold bg-brand-200 text-brand-800 px-2 py-1 rounded-full';
+                countBadge.textContent = `${group.length} Orang`;
+                
+                header.appendChild(title);
+                header.appendChild(countBadge);
+                card.appendChild(header);
+
+                // List Container
+                const listContainer = document.createElement('div');
+                listContainer.className = 'p-5 flex-1';
+                
+                const ul = document.createElement('ul');
+                ul.className = 'space-y-2';
+
+                // Add names to list
+                group.forEach(name => {
+                    const li = document.createElement('li');
+                    li.className = 'text-slate-700 text-sm flex items-start gap-2 before:content-["•"] before:text-brand-400 before:font-bold';
+                    li.textContent = name;
+                    ul.appendChild(li);
+                });
+
+                listContainer.appendChild(ul);
+                card.appendChild(listContainer);
+                
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        // Copy Text to Clipboard Functionality
+        copyBtn.addEventListener('click', () => {
+            if(groupedResults.length === 0) return;
+
+            let textToCopy = "Hasil Pembagian Kelompok:\n\n";
+            groupedResults.forEach((group, index) => {
+                textToCopy += `Kelompok ${index + 1} (${group.length} orang):\n`;
+                group.forEach(name => {
+                    textToCopy += `- ${name}\n`;
+                });
+                textToCopy += "\n";
+            });
+
+            // Modern clipboard API fallback to execCommand
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    showToast('Hasil disalin ke clipboard!');
+                }).catch(err => {
+                    fallbackCopyTextToClipboard(textToCopy);
+                });
+            } else {
+                fallbackCopyTextToClipboard(textToCopy);
+            }
+        });
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Hasil disalin ke clipboard!');
+            } catch (err) {
+                showError('Gagal menyalin teks.');
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Helper function to display error messages without using alert()
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorMessage.classList.remove('hidden');
+            // Scroll to error if not in view (useful for mobile)
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideError() {
+            errorMessage.classList.add('hidden');
+            errorMessage.textContent = '';
+        }
+
+        function showToast(msg) {
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = msg;
+            
+            // Animate in
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
