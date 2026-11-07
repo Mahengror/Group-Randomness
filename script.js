@@ -21,7 +21,6 @@ const errorMessage = document.getElementById('errorMessage');
 const resultsContainer = document.getElementById('resultsContainer');
 const copyBtn = document.getElementById('copyBtn');
 const downloadExcelBtn = document.getElementById('downloadExcelBtn');
-const downloadImageBtn = document.getElementById('downloadImageBtn'); 
 const toast = document.getElementById('toast');
 const dropZone = document.getElementById('dropZone');
 
@@ -62,7 +61,6 @@ groupMode.addEventListener('change', () => {
         groupHelpText.textContent = "Tentukan setiap kelompok berisi berapa orang.";
     }
     
-    // FIX: Tambahkan w-full agar posisinya pas di tengah layar pembagian
     resultsContainer.innerHTML = `
         <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full animate-fade-in-up">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
@@ -74,7 +72,6 @@ groupMode.addEventListener('change', () => {
     
     copyBtn.classList.add('hidden');
     downloadExcelBtn.classList.add('hidden');
-    if(downloadImageBtn) downloadImageBtn.classList.add('hidden'); 
     hideError();
 });
 
@@ -137,7 +134,6 @@ window.removeName = function(index) {
     updateNamePreview();
 
     if (generatedGroupsData.length > 0) {
-        // FIX: Tambahkan w-full
         resultsContainer.innerHTML = `
             <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full animate-fade-in-up">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mb-4 text-amber-300">
@@ -150,7 +146,6 @@ window.removeName = function(index) {
         
         copyBtn.classList.add('hidden');
         downloadExcelBtn.classList.add('hidden');
-        if(downloadImageBtn) downloadImageBtn.classList.add('hidden');
         
         generatedGroupsData = [];
         generatedTextOutput = "";
@@ -226,7 +221,8 @@ function processAndRenderGroups(inputValue, mode) {
         });
 
         const card = document.createElement('div');
-        card.className = "group-card bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-slate-200 opacity-0 animate-fade-in-up transition-all";
+        // Tambahkan w-full ke class
+        card.className = "group-card w-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-slate-200 opacity-0 animate-fade-in-up transition-all";
         card.style.animationDelay = `${index * 0.1}s`; 
         card.innerHTML = `
             <div class="bg-brand-50 border-b border-slate-100 px-5 py-3 flex items-center justify-between transition-colors duration-300">
@@ -234,7 +230,7 @@ function processAndRenderGroups(inputValue, mode) {
                 <span class="member-count bg-brand-200 text-brand-800 px-2 py-1 rounded-full text-xs font-semibold">${group.length} orang</span>
             </div>
             <div class="drop-zone-container p-5 flex-1 transition-colors duration-300 rounded-b-2xl">
-                <ul class="drop-zone space-y-2 min-h-[50px] h-full">
+                <ul class="drop-zone space-y-2 min-h-[50px] h-full w-full">
                     ${listHTML}
                 </ul>
             </div>
@@ -246,7 +242,6 @@ function processAndRenderGroups(inputValue, mode) {
     
     copyBtn.classList.remove('hidden');
     downloadExcelBtn.classList.remove('hidden');
-    if(downloadImageBtn) downloadImageBtn.classList.remove('hidden');
 
     attachGroupDragAndDrop(); 
 }
@@ -312,7 +307,7 @@ function syncDataFromUI() {
 }
 
 // ==========================================
-// 7. COPY, EXCEL, & GAMBAR
+// 7. COPY & EXCEL
 // ==========================================
 copyBtn.addEventListener('click', () => {
     if (generatedTextOutput) {
@@ -342,52 +337,6 @@ downloadExcelBtn.addEventListener('click', () => {
     XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
-if(downloadImageBtn) {
-    downloadImageBtn.addEventListener('click', () => {
-        if (generatedGroupsData.length === 0) return;
-
-        const originalContent = downloadImageBtn.innerHTML;
-        downloadImageBtn.innerHTML = "Memproses...";
-        
-        // FIX: Scroll dipaksa ke atas sementara agar html2canvas tidak memotong grid
-        const currentScroll = window.scrollY;
-        window.scrollTo(0, 0);
-
-        // FIX: Foto kotak putih besarnya (parent), bukan cuma isi dalamnya
-        const exportArea = resultsContainer.parentElement;
-        
-        // Sembunyikan tombol-tombol sebentar biar nggak ikut ke-screenshot
-        const actionButtons = copyBtn.parentElement;
-        if (actionButtons) actionButtons.style.display = 'none';
-        
-        html2canvas(exportArea, {
-            backgroundColor: "#ffffff", 
-            scale: 2, 
-            scrollY: 0,
-            useCORS: true
-        }).then(canvas => {
-            const imageURL = canvas.toDataURL("image/png");
-            const downloadLink = document.createElement('a');
-            downloadLink.href = imageURL;
-            downloadLink.download = "Hasil_Kelompok.png";
-            
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-
-            // Kembalikan kondisi web seperti semula
-            if (actionButtons) actionButtons.style.display = '';
-            window.scrollTo(0, currentScroll);
-            downloadImageBtn.innerHTML = originalContent;
-        }).catch(err => {
-            alert("Gagal membuat gambar: " + err);
-            if (actionButtons) actionButtons.style.display = '';
-            window.scrollTo(0, currentScroll);
-            downloadImageBtn.innerHTML = originalContent;
-        });
-    });
-}
-
 // ==========================================
 // 8. RESET DATA
 // ==========================================
@@ -408,9 +357,8 @@ resetBtn.addEventListener('click', () => {
     nameCount.textContent = "0 nama";
     nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>`;
     
-    // FIX: Tambahkan w-full
     resultsContainer.innerHTML = `
-        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full animate-fade-in-up">
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
@@ -420,7 +368,6 @@ resetBtn.addEventListener('click', () => {
     
     copyBtn.classList.add('hidden');
     downloadExcelBtn.classList.add('hidden');
-    if(downloadImageBtn) downloadImageBtn.classList.add('hidden');
 });
 
 // ==========================================
