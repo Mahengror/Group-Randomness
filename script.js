@@ -21,7 +21,7 @@ const errorMessage = document.getElementById('errorMessage');
 const resultsContainer = document.getElementById('resultsContainer');
 const copyBtn = document.getElementById('copyBtn');
 const downloadExcelBtn = document.getElementById('downloadExcelBtn');
-const downloadImageBtn = document.getElementById('downloadImageBtn'); // DOM Baru untuk Gambar
+const downloadImageBtn = document.getElementById('downloadImageBtn'); 
 const toast = document.getElementById('toast');
 const dropZone = document.getElementById('dropZone');
 
@@ -62,8 +62,9 @@ groupMode.addEventListener('change', () => {
         groupHelpText.textContent = "Tentukan setiap kelompok berisi berapa orang.";
     }
     
+    // FIX: Tambahkan w-full agar posisinya pas di tengah layar pembagian
     resultsContainer.innerHTML = `
-        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full animate-fade-in-up">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
@@ -71,7 +72,6 @@ groupMode.addEventListener('change', () => {
         </div>
     `;
     
-    // Sembunyikan semua tombol export
     copyBtn.classList.add('hidden');
     downloadExcelBtn.classList.add('hidden');
     if(downloadImageBtn) downloadImageBtn.classList.add('hidden'); 
@@ -137,8 +137,9 @@ window.removeName = function(index) {
     updateNamePreview();
 
     if (generatedGroupsData.length > 0) {
+        // FIX: Tambahkan w-full
         resultsContainer.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 animate-fade-in-up">
+            <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full animate-fade-in-up">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mb-4 text-amber-300">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -243,7 +244,6 @@ function processAndRenderGroups(inputValue, mode) {
 
     syncDataFromUI(); 
     
-    // Munculkan semua tombol export
     copyBtn.classList.remove('hidden');
     downloadExcelBtn.classList.remove('hidden');
     if(downloadImageBtn) downloadImageBtn.classList.remove('hidden');
@@ -349,9 +349,22 @@ if(downloadImageBtn) {
         const originalContent = downloadImageBtn.innerHTML;
         downloadImageBtn.innerHTML = "Memproses...";
         
-        html2canvas(resultsContainer, {
+        // FIX: Scroll dipaksa ke atas sementara agar html2canvas tidak memotong grid
+        const currentScroll = window.scrollY;
+        window.scrollTo(0, 0);
+
+        // FIX: Foto kotak putih besarnya (parent), bukan cuma isi dalamnya
+        const exportArea = resultsContainer.parentElement;
+        
+        // Sembunyikan tombol-tombol sebentar biar nggak ikut ke-screenshot
+        const actionButtons = copyBtn.parentElement;
+        if (actionButtons) actionButtons.style.display = 'none';
+        
+        html2canvas(exportArea, {
             backgroundColor: "#ffffff", 
-            scale: 2 
+            scale: 2, 
+            scrollY: 0,
+            useCORS: true
         }).then(canvas => {
             const imageURL = canvas.toDataURL("image/png");
             const downloadLink = document.createElement('a');
@@ -362,9 +375,14 @@ if(downloadImageBtn) {
             downloadLink.click();
             document.body.removeChild(downloadLink);
 
+            // Kembalikan kondisi web seperti semula
+            if (actionButtons) actionButtons.style.display = '';
+            window.scrollTo(0, currentScroll);
             downloadImageBtn.innerHTML = originalContent;
         }).catch(err => {
             alert("Gagal membuat gambar: " + err);
+            if (actionButtons) actionButtons.style.display = '';
+            window.scrollTo(0, currentScroll);
             downloadImageBtn.innerHTML = originalContent;
         });
     });
@@ -389,8 +407,10 @@ resetBtn.addEventListener('click', () => {
 
     nameCount.textContent = "0 nama";
     nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>`;
+    
+    // FIX: Tambahkan w-full
     resultsContainer.innerHTML = `
-        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full animate-fade-in-up">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
