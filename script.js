@@ -207,56 +207,57 @@ function showToast() {
 }
 
 // ==========================================
-// FITUR DRAG AND DROP (SERET & LEPAS)
+// FITUR DRAG AND DROP (SERET & LEPAS) - DIPERBAIKI
 // ==========================================
 
 const dropZone = document.getElementById('dropZone');
 
-// Mencegah browser membuka file teks di tab baru secara default
+// 1. BLOKIR perilaku bawaan browser di SELURUH halaman (mencegah file terbuka di tab baru)
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, preventDefaults, false);
-    document.body.addEventListener(eventName, preventDefaults, false);
-});
-
-function preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-}
-
-// 1. Tambahkan efek visual (Highlight) saat file berada di atas area
-['dragenter', 'dragover'].forEach(eventName => {
-    dropZone.addEventListener(eventName, () => {
-        // Mengubah warna background, border, dan mengubah garis putus-putus menjadi solid
-        dropZone.classList.remove('border-slate-300', 'bg-slate-50', 'border-dashed');
-        dropZone.classList.add('border-brand-500', 'bg-brand-50', 'border-solid');
+    window.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
     }, false);
 });
 
-// 2. Hilangkan efek visual saat kursor keluar atau file dilepaskan (Drop)
-['dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, () => {
-        // Kembalikan ke desain awal
-        dropZone.classList.remove('border-brand-500', 'bg-brand-50', 'border-solid');
-        dropZone.classList.add('border-slate-300', 'bg-slate-50', 'border-dashed');
-    }, false);
+// 2. Efek visual saat file masuk ke atas area kotak upload
+dropZone.addEventListener('dragover', (e) => {
+    // Ubah warna kotak menjadi biru dan garisnya menjadi solid
+    dropZone.classList.remove('border-slate-300', 'bg-slate-50', 'border-dashed');
+    dropZone.classList.add('border-brand-500', 'bg-brand-50', 'border-solid');
 });
 
-// 3. Tangani file saat dilepaskan (Drop)
+// 3. Efek visual dikembalikan ke semula saat kursor/file keluar dari kotak
+dropZone.addEventListener('dragleave', (e) => {
+    dropZone.classList.remove('border-brand-500', 'bg-brand-50', 'border-solid');
+    dropZone.classList.add('border-slate-300', 'bg-slate-50', 'border-dashed');
+});
+
+// 4. Tangani file saat dilepaskan (Drop) tepat di dalam kotak
 dropZone.addEventListener('drop', (e) => {
+    // Kembalikan tampilan kotak ke semula
+    dropZone.classList.remove('border-brand-500', 'bg-brand-50', 'border-solid');
+    dropZone.classList.add('border-slate-300', 'bg-slate-50', 'border-dashed');
+
     const dt = e.dataTransfer;
     const files = dt.files;
 
     if (files && files.length > 0) {
-        // Pastikan file yang di-drop adalah file .txt
-        if (files[0].type === "text/plain" || files[0].name.endsWith('.txt')) {
-            // Masukkan file hasil drag ke elemen input file (fileInput)
-            fileInput.files = files;
+        const file = files[0];
+        
+        // Pastikan file yang di-drop benar-benar berekstensi .txt
+        if (file.type === "text/plain" || file.name.endsWith('.txt')) {
+            const fileInput = document.getElementById('fileInput');
             
-            // Picu/panggil event 'change' secara manual agar logika membaca file yang sudah kita buat sebelumnya otomatis berjalan
-            const event = new Event('change');
-            fileInput.dispatchEvent(event);
+            // Trik khusus untuk memasukkan file dari drag-and-drop ke input file HTML
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            
+            // Panggil event 'change' agar logika pembacaan file otomatis berjalan
+            fileInput.dispatchEvent(new Event('change'));
         } else {
-            showError("Format file tidak didukung. Harap upload file .txt");
+            showError("Format file tidak didukung. Harap upload file berekstensi .txt");
         }
     }
-}, false);
+});
