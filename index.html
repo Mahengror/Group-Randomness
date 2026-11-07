@@ -15,9 +15,6 @@
     <!-- SheetJS untuk Export Excel -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     
-    <!-- html2canvas untuk Export Gambar -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -30,7 +27,7 @@
                 'font-bold', 'text-brand-700', 'font-semibold', 'bg-brand-200', 'text-brand-800', 'px-2', 'py-1', 'rounded-full',
                 'p-5', 'flex-1', 'space-y-2', 'items-start', 'gap-2', 'before:content-["•"]', 'before:text-brand-400', 'before:font-bold',
                 'animate-fade-in-up', 'opacity-0', 'justify-between', 'group', 'group-hover:opacity-100', 'hover:text-red-500', 'hover:bg-red-50', 'p-1.5', 'min-w-[24px]', 'text-amber-300', 'text-amber-600',
-                'cursor-grab', 'active:cursor-grabbing', 'ring-2', 'ring-brand-500', 'min-h-[50px]', 'bg-brand-100', 'opacity-50', 'text-left'
+                'cursor-grab', 'active:cursor-grabbing', 'ring-2', 'ring-brand-500', 'min-h-[50px]', 'bg-brand-100', 'opacity-50', 'text-left', 'w-full'
             ],
             theme: {
                 extend: {
@@ -143,7 +140,7 @@
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-slate-100 pb-4 gap-4 w-full">
                         <h2 class="text-xl font-bold text-slate-800 m-0">Hasil Pembagian Kelompok</h2>
                         
-                        <!-- Grup Tombol -->
+                        <!-- Grup Tombol Export (Hanya Salin dan Excel) -->
                         <div class="flex flex-wrap items-center gap-2 sm:gap-4">
                             <button id="copyBtn" class="hidden text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
@@ -157,19 +154,13 @@
                                 </svg>
                                 Excel
                             </button>
-                            <button id="downloadImageBtn" class="hidden text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center gap-1 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                </svg>
-                                Gambar
-                            </button>
                         </div>
                     </div>
 
-                    <!-- Groups Grid Container (Dimulai dari Kiri) -->
+                    <!-- Groups Grid Container -->
                     <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 transition-opacity duration-300 w-full justify-items-start items-start content-start flex-1">
                         
-                        <!-- Empty State (Berada tepat di tengah w-full) -->
+                        <!-- Empty State -->
                         <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400 w-full">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
@@ -183,17 +174,14 @@
             
         </div>
 
-        <!-- Footer Section (Sesuai Permintaan) -->
+        <!-- Footer Section -->
         <footer class="mt-12 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-sm w-full">
-            <!-- Bagian Credit -->
             <div class="text-slate-500 text-center md:text-left">
                 <p>
                     Developed by <a href="https://github.com/Mahengror" target="_blank" class="font-semibold text-slate-700 hover:text-brand-600 transition-colors">Mahengror</a> 
                     & Designed with <span class="font-semibold text-brand-600">Gemini AI</span> ✨
                 </p>
             </div>
-            
-            <!-- Bagian Link Medsos -->
             <div class="flex items-center gap-6 font-medium text-slate-500">
                 <a href="https://instagram.com/mahengrorpr" target="_blank" class="hover:text-pink-600 transition-colors">Instagram</a>
                 <a href="https://github.com/Mahengror" target="_blank" class="hover:text-slate-900 transition-colors">GitHub</a>
