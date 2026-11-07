@@ -1,22 +1,51 @@
-// Deklarasi Variabel Global
+// ==========================================
+// 1. DEKLARASI VARIABEL GLOBAL & DOM
+// ==========================================
 let parsedNames = [];
-let generatedTextOutput = "";
 let generatedGroupsData = [];
-const downloadExcelBtn = document.getElementById('downloadExcelBtn');
+let generatedTextOutput = "";
 
-// Element DOM
 const fileInput = document.getElementById('fileInput');
 const fileStatus = document.getElementById('fileStatus');
 const nameList = document.getElementById('nameList');
 const nameCount = document.getElementById('nameCount');
 const groupCountInput = document.getElementById('groupCount');
 const generateBtn = document.getElementById('generateBtn');
+const resetBtn = document.getElementById('resetBtn');
 const errorMessage = document.getElementById('errorMessage');
 const resultsContainer = document.getElementById('resultsContainer');
 const copyBtn = document.getElementById('copyBtn');
+const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const toast = document.getElementById('toast');
+const dropZone = document.getElementById('dropZone');
 
-// Event 1: Membaca file saat diupload
+
+// ==========================================
+// 2. FUNGSI BANTUAN UI
+// ==========================================
+function showError(msg) {
+    errorMessage.textContent = msg;
+    errorMessage.classList.remove('hidden');
+}
+
+function hideError() {
+    errorMessage.classList.add('hidden');
+    errorMessage.textContent = "";
+}
+
+function showToast() {
+    toast.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-20', 'pointer-events-none');
+        toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    }, 3000);
+}
+
+
+// ==========================================
+// 3. LOGIKA MEMBACA FILE (UPLOAD)
+// ==========================================
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -27,29 +56,24 @@ fileInput.addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = function(event) {
         const text = event.target.result;
-        // Bersihkan dan ambil data nama (hapus baris kosong)
         parsedNames = text.split(/\r?\n/).map(name => name.trim()).filter(name => name !== "");
-        
         updateNamePreview();
     };
     reader.readAsText(file);
 });
 
-// Memperbarui daftar nama di UI sebelah kiri
 function updateNamePreview() {
     nameCount.textContent = `${parsedNames.length} nama`;
-    nameList.innerHTML = ""; // Bersihkan list
+    nameList.innerHTML = ""; 
 
     if (parsedNames.length === 0) {
         nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">File kosong atau format salah.</li>`;
         return;
     }
 
-    // Buat list nama menggunakan class Tailwind dari safelist
     parsedNames.forEach((name, index) => {
         const li = document.createElement('li');
         li.className = "py-2.5 px-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-sm flex items-center gap-3 transition-colors hover:bg-slate-100";
-        
         li.innerHTML = `
             <span class="w-6 h-6 flex justify-center items-center bg-slate-200 text-slate-500 rounded-md text-xs font-medium">${index + 1}</span>
             <span class="truncate">${name}</span>
@@ -58,11 +82,13 @@ function updateNamePreview() {
     });
 }
 
-// Event 2: Klik Tombol "Bagi Kelompok"
+
+// ==========================================
+// 4. LOGIKA PENGACAKAN KELOMPOK
+// ==========================================
 generateBtn.addEventListener('click', () => {
     const groupCount = parseInt(groupCountInput.value);
 
-    // Validasi input
     if (parsedNames.length === 0) {
         showError("Silakan upload file .txt terlebih dahulu.");
         return;
@@ -80,36 +106,29 @@ generateBtn.addEventListener('click', () => {
     processAndRenderGroups(groupCount);
 });
 
-// Proses pengacakan dan rendering kelompok
 function processAndRenderGroups(groupCount) {
-    // 1. Acak nama menggunakan Fisher-Yates Shuffle
     let shuffledNames = [...parsedNames];
     for (let i = shuffledNames.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
     }
 
-    // 2. Siapkan array kelompok
     const groups = Array.from({ length: groupCount }, () => []);
-
-    // 3. Bagikan secara merata (Round-Robin)
     shuffledNames.forEach((name, index) => {
         groups[index % groupCount].push(name);
     });
 
-    // 4. Render Hasil ke UI & Siapkan Teks untuk Fitur Salin
     resultsContainer.innerHTML = "";
     generatedTextOutput = "";
+    generatedGroupsData = groups; // Simpan untuk Excel
 
     groups.forEach((group, index) => {
-        // Teks untuk disalin
         generatedTextOutput += `Kelompok ${index + 1} - ${group.length} orang\n`;
         group.forEach(name => {
             generatedTextOutput += `- ${name}\n`;
         });
         generatedTextOutput += `\n`;
 
-        // Render card UI HTML untuk setiap kelompok
         let listHTML = "";
         group.forEach(name => {
             listHTML += `<li class="flex items-start gap-2 before:content-['•'] before:text-brand-400 before:font-bold text-sm text-slate-700">${name}</li>`;
@@ -131,15 +150,14 @@ function processAndRenderGroups(groupCount) {
         resultsContainer.appendChild(card);
     });
 
-    // Simpan data kelompok ke variabel global untuk Excel
-    generatedGroupsData = groups;
-
-    // Tampilkan tombol aksi
     copyBtn.classList.remove('hidden');
     downloadExcelBtn.classList.remove('hidden');
 }
 
-// Event 3: Fitur Salin Teks
+
+// ==========================================
+// 5. FITUR COPY TEKS
+// ==========================================
 copyBtn.addEventListener('click', () => {
     if (generatedTextOutput) {
         navigator.clipboard.writeText(generatedTextOutput.trim()).then(() => {
@@ -150,69 +168,69 @@ copyBtn.addEventListener('click', () => {
     }
 });
 
-// Event 4: Fitur Download Excel
+
+// ==========================================
+// 6. FITUR DOWNLOAD EXCEL
+// ==========================================
 downloadExcelBtn.addEventListener('click', () => {
     if (generatedGroupsData.length === 0) return;
 
-    // 1. Siapkan struktur data untuk Excel (Array 2 Dimensi)
     const excelData = [];
-    
-    // 2. Buat Header (Baris pertama: Kelompok 1, Kelompok 2, dst)
     const headers = generatedGroupsData.map((_, index) => `Kelompok ${index + 1}`);
     excelData.push(headers);
 
-    // 3. Cari kelompok dengan jumlah anggota terbanyak untuk menentukan jumlah baris
     const maxMembers = Math.max(...generatedGroupsData.map(group => group.length));
 
-    // 4. Masukkan nama-nama anggota ke baris yang sesuai di bawah kolom kelompoknya
     for (let i = 0; i < maxMembers; i++) {
         const row = [];
         for (let j = 0; j < generatedGroupsData.length; j++) {
-            // Jika ada nama, masukkan. Jika kelompok sudah habis anggotanya, isi string kosong
             row.push(generatedGroupsData[j][i] || "");
         }
         excelData.push(row);
     }
 
-    // 5. Proses pembuatan file Excel menggunakan SheetJS
     const worksheet = XLSX.utils.aoa_to_sheet(excelData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Hasil Pembagian");
-
-    // 6. Trigger unduhan file
     XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
-// Fungsi Bantuan UI
-function showError(msg) {
-    errorMessage.textContent = msg;
-    errorMessage.classList.remove('hidden');
-}
-
-function hideError() {
-    errorMessage.classList.add('hidden');
-    errorMessage.textContent = "";
-}
-
-function showToast() {
-    // Menampilkan toast menggunakan class Tailwind
-    toast.classList.remove('opacity-0', 'translate-y-20', 'pointer-events-none');
-    toast.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
-    
-    // Sembunyikan setelah 3 detik
-    setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-20', 'pointer-events-none');
-        toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
-    }, 3000);
-}
 
 // ==========================================
-// FITUR DRAG AND DROP (SERET & LEPAS) - DIPERBAIKI
+// 7. FITUR RESET DATA
 // ==========================================
+resetBtn.addEventListener('click', () => {
+    parsedNames = [];
+    generatedGroupsData = [];
+    generatedTextOutput = "";
 
-const dropZone = document.getElementById('dropZone');
+    fileInput.value = ""; 
+    fileStatus.textContent = "Belum ada file terpilih";
+    fileStatus.classList.remove('text-brand-600', 'font-medium');
+    groupCountInput.value = "";
+    hideError();
 
-// 1. BLOKIR perilaku bawaan browser di SELURUH halaman (mencegah file terbuka di tab baru)
+    nameCount.textContent = "0 nama";
+    nameList.innerHTML = `<li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>`;
+
+    resultsContainer.innerHTML = `
+        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+            </svg>
+            <p>Belum ada kelompok yang dibagikan.</p>
+            <p class="text-sm">Silakan upload daftar nama dan klik "Bagi Kelompok".</p>
+        </div>
+    `;
+
+    copyBtn.classList.add('hidden');
+    downloadExcelBtn.classList.add('hidden');
+});
+
+
+// ==========================================
+// 8. FITUR DRAG AND DROP (DIPERBAIKI)
+// ==========================================
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     window.addEventListener(eventName, (e) => {
         e.preventDefault();
@@ -220,22 +238,17 @@ const dropZone = document.getElementById('dropZone');
     }, false);
 });
 
-// 2. Efek visual saat file masuk ke atas area kotak upload
-dropZone.addEventListener('dragover', (e) => {
-    // Ubah warna kotak menjadi biru dan garisnya menjadi solid
+dropZone.addEventListener('dragover', () => {
     dropZone.classList.remove('border-slate-300', 'bg-slate-50', 'border-dashed');
     dropZone.classList.add('border-brand-500', 'bg-brand-50', 'border-solid');
 });
 
-// 3. Efek visual dikembalikan ke semula saat kursor/file keluar dari kotak
-dropZone.addEventListener('dragleave', (e) => {
+dropZone.addEventListener('dragleave', () => {
     dropZone.classList.remove('border-brand-500', 'bg-brand-50', 'border-solid');
     dropZone.classList.add('border-slate-300', 'bg-slate-50', 'border-dashed');
 });
 
-// 4. Tangani file saat dilepaskan (Drop) tepat di dalam kotak
 dropZone.addEventListener('drop', (e) => {
-    // Kembalikan tampilan kotak ke semula
     dropZone.classList.remove('border-brand-500', 'bg-brand-50', 'border-solid');
     dropZone.classList.add('border-slate-300', 'bg-slate-50', 'border-dashed');
 
@@ -244,17 +257,12 @@ dropZone.addEventListener('drop', (e) => {
 
     if (files && files.length > 0) {
         const file = files[0];
-        
-        // Pastikan file yang di-drop benar-benar berekstensi .txt
         if (file.type === "text/plain" || file.name.endsWith('.txt')) {
-            const fileInput = document.getElementById('fileInput');
-            
-            // Trik khusus untuk memasukkan file dari drag-and-drop ke input file HTML
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             fileInput.files = dataTransfer.files;
             
-            // Panggil event 'change' agar logika pembacaan file otomatis berjalan
+            // Picu perubahan agar fungsi baca file berjalan
             fileInput.dispatchEvent(new Event('change'));
         } else {
             showError("Format file tidak didukung. Harap upload file berekstensi .txt");
