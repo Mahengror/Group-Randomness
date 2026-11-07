@@ -205,3 +205,58 @@ function showToast() {
         toast.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
     }, 3000);
 }
+
+// ==========================================
+// FITUR DRAG AND DROP (SERET & LEPAS)
+// ==========================================
+
+const dropZone = document.getElementById('dropZone');
+
+// Mencegah browser membuka file teks di tab baru secara default
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+    document.body.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+// 1. Tambahkan efek visual (Highlight) saat file berada di atas area
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => {
+        // Mengubah warna background, border, dan mengubah garis putus-putus menjadi solid
+        dropZone.classList.remove('border-slate-300', 'bg-slate-50', 'border-dashed');
+        dropZone.classList.add('border-brand-500', 'bg-brand-50', 'border-solid');
+    }, false);
+});
+
+// 2. Hilangkan efek visual saat kursor keluar atau file dilepaskan (Drop)
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => {
+        // Kembalikan ke desain awal
+        dropZone.classList.remove('border-brand-500', 'bg-brand-50', 'border-solid');
+        dropZone.classList.add('border-slate-300', 'bg-slate-50', 'border-dashed');
+    }, false);
+});
+
+// 3. Tangani file saat dilepaskan (Drop)
+dropZone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files && files.length > 0) {
+        // Pastikan file yang di-drop adalah file .txt
+        if (files[0].type === "text/plain" || files[0].name.endsWith('.txt')) {
+            // Masukkan file hasil drag ke elemen input file (fileInput)
+            fileInput.files = files;
+            
+            // Picu/panggil event 'change' secara manual agar logika membaca file yang sudah kita buat sebelumnya otomatis berjalan
+            const event = new Event('change');
+            fileInput.dispatchEvent(event);
+        } else {
+            showError("Format file tidak didukung. Harap upload file .txt");
+        }
+    }
+}, false);
