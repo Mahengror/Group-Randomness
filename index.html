@@ -3,33 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acak Kelompok</title>
+    <title>Pembagi Kelompok Otomatis</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            // Mendaftarkan class dari script.js agar tidak diabaikan oleh Tailwind CDN
+            safelist: [
+                'py-2.5', 'px-4', 'bg-slate-50', 'rounded-xl', 'border', 'border-slate-200', 'text-slate-700', 'text-sm', 'flex', 'items-center', 'gap-3', 'transition-colors', 'hover:bg-slate-100',
+                'w-6', 'h-6', 'justify-center', 'bg-slate-200', 'text-slate-500', 'rounded-md', 'text-xs', 'font-medium', 'truncate',
+                'bg-white', 'rounded-2xl', 'overflow-hidden', 'shadow-sm', 'hover:shadow-md', 'transition-shadow', 'flex-col',
+                'bg-brand-50', 'border-b', 'border-slate-100', 'px-5', 'py-3', 'justify-between',
+                'font-bold', 'text-brand-700', 'font-semibold', 'bg-brand-200', 'text-brand-800', 'px-2', 'py-1', 'rounded-full',
+                'p-5', 'flex-1', 'space-y-2', 'items-start', 'gap-2', 'before:content-["•"]', 'before:text-brand-400', 'before:font-bold'
+            ],
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <div class="container">
-        <h1>Pembuat Kelompok Acak</h1>
-        
-        <div class="input-group">
-            <label for="fileInput">1. Upload File (.txt):</label>
-            <input type="file" id="fileInput" accept=".txt">
-            <small>Setiap baris di dalam file akan dihitung sebagai 1 nama.</small>
-        </div>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans">
 
-        <div class="input-group">
-            <label for="groupCount">2. Jumlah Kelompok:</label>
-            <input type="number" id="groupCount" min="1" placeholder="Masukkan angka...">
-        </div>
-
-        <button id="generateBtn">Buat Kelompok</button>
-
-        <div id="outputContainer" class="hidden">
-            <div class="output-header">
-                <h2>Hasil Pembagian:</h2>
-                <button id="copyBtn">Salin Hasil</button>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <div class="inline-flex items-center justify-center p-1 bg-brand-100 rounded-full mb-4 text-brand-600 overflow-hidden">
+                <img src="assets/user.jpg" alt="Logo" class="w-12 h-12 rounded-full object-cover">
             </div>
-            <pre id="resultText"></pre>
+            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-2">Pembagi Kelompok Acak</h1>
+            <p class="text-slate-500 max-w-2xl mx-auto">Upload file .txt berisi daftar nama (satu nama per baris), tentukan jumlah kelompok, dan biarkan sistem mengacaknya secara adil.</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Left Column: Controls & Input -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Card Input -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    
+                    <!-- File Upload -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-slate-700 mb-2">1. Upload Daftar Nama (.txt)</label>
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-brand-500 transition-colors bg-slate-50 relative group cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                            <div class="space-y-1 text-center">
+                                <svg class="mx-auto h-12 w-12 text-slate-400 group-hover:text-brand-500 transition-colors" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                <div class="flex text-sm text-slate-600 justify-center">
+                                    <label for="fileInput" class="relative cursor-pointer rounded-md font-medium text-brand-600 hover:text-brand-500 focus-within:outline-none">
+                                        <span>Pilih File</span>
+                                        <input id="fileInput" name="fileInput" type="file" accept=".txt" class="sr-only">
+                                    </label>
+                                    <p class="pl-1">atau klik di sini</p>
+                                </div>
+                                <p class="text-xs text-slate-500" id="fileStatus">Belum ada file terpilih</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Number of Groups -->
+                    <div class="mb-6">
+                        <label for="groupCount" class="block text-sm font-medium text-slate-700 mb-2">2. Jumlah Kelompok</label>
+                        <input type="number" id="groupCount" min="1" placeholder="Contoh: 5" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-shadow">
+                    </div>
+
+                    <!-- Error Message Box -->
+                    <div id="errorMessage" class="hidden mb-4 p-4 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200">
+                        <!-- Error text will appear here -->
+                    </div>
+
+                    <!-- Action Button -->
+                    <button id="generateBtn" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 px-4 rounded-xl transition-colors shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                        Bagi Kelompok
+                    </button>
+                </div>
+
+                <!-- Name List Preview -->
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-slate-800">Daftar Nama</h2>
+                        <span id="nameCount" class="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">0 nama</span>
+                    </div>
+                    <div class="flex-1 overflow-y-auto pr-2">
+                        <ul id="nameList" class="space-y-2">
+                            <!-- List of names will be generated here -->
+                            <li class="text-slate-400 text-sm text-center py-8 italic border-2 border-dashed border-slate-100 rounded-xl">Nama-nama akan muncul di sini setelah file diupload.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 min-h-[500px]">
+                    <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Hasil Pembagian Kelompok</h2>
+                        <button id="copyBtn" class="hidden text-brand-600 hover:text-brand-700 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+                            </svg>
+                            Salin Hasil
+                        </button>
+                    </div>
+
+                    <!-- Groups Grid Container -->
+                    <div id="resultsContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Empty State -->
+                        <div class="col-span-full flex flex-col items-center justify-center py-16 text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="w-16 h-16 mb-4 text-slate-300">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                            </svg>
+                            <p>Belum ada kelompok yang dibagikan.</p>
+                            <p class="text-sm">Silakan upload daftar nama dan klik "Bagi Kelompok".</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
+    </div>
+
+    <!-- Notification Toast (for copy action) -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 z-50 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 text-green-400">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+        </svg>
+        <span id="toastMsg">Teks disalin!</span>
     </div>
 
     <script src="script.js"></script>
