@@ -9,7 +9,11 @@ const fileInput = document.getElementById('fileInput');
 const fileStatus = document.getElementById('fileStatus');
 const nameList = document.getElementById('nameList');
 const nameCount = document.getElementById('nameCount');
+
+const groupMode = document.getElementById('groupMode'); // DOM Baru untuk Mode
 const groupCountInput = document.getElementById('groupCount');
+const groupHelpText = document.getElementById('groupHelpText'); // DOM Baru untuk Bantuan
+
 const generateBtn = document.getElementById('generateBtn');
 const resetBtn = document.getElementById('resetBtn');
 const errorMessage = document.getElementById('errorMessage');
@@ -19,10 +23,10 @@ const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const toast = document.getElementById('toast');
 const dropZone = document.getElementById('dropZone');
 
-// Element DOM untuk Animasi Tombol
 const generateIcon = document.getElementById('generateIcon');
 const loadingIcon = document.getElementById('loadingIcon');
 const generateText = document.getElementById('generateText');
+
 
 // ==========================================
 // 2. FUNGSI BANTUAN UI
@@ -46,8 +50,23 @@ function showToast() {
     }, 3000);
 }
 
+
 // ==========================================
-// 3. LOGIKA MEMBACA FILE (UPLOAD) + PENCEGAH DUPLIKAT
+// 3. LOGIKA INTERAKSI DROPDOWN MODE KELOMPOK
+// ==========================================
+groupMode.addEventListener('change', () => {
+    if (groupMode.value === 'groupCount') {
+        groupCountInput.placeholder = "Contoh: 5";
+        groupHelpText.textContent = "Tentukan sistem ingin membuat berapa kelompok.";
+    } else {
+        groupCountInput.placeholder = "Contoh: 4";
+        groupHelpText.textContent = "Tentukan setiap kelompok berisi berapa orang.";
+    }
+});
+
+
+// ==========================================
+// 4. LOGIKA MEMBACA FILE (UPLOAD) + PENCEGAH DUPLIKAT
 // ==========================================
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -56,11 +75,8 @@ fileInput.addEventListener('change', (e) => {
     const reader = new FileReader();
     reader.onload = function(event) {
         const text = event.target.result;
-        
-        // Ambil nama dan hapus baris kosong
         const rawNames = text.split(/\r?\n/).map(name => name.trim()).filter(name => name !== "");
         
-        // Hapus duplikat otomatis menggunakan Set()
         parsedNames = [...new Set(rawNames)];
         const duplicateCount = rawNames.length - parsedNames.length;
 
@@ -96,31 +112,36 @@ function updateNamePreview() {
     });
 }
 
+
 // ==========================================
-// 4. LOGIKA PENGACAKAN KELOMPOK (DENGAN ANIMASI)
+// 5. LOGIKA PENGACAKAN KELOMPOK (DENGAN ANIMASI)
 // ==========================================
 generateBtn.addEventListener('click', () => {
-    const groupCount = parseInt(groupCountInput.value);
+    const inputValue = parseInt(groupCountInput.value);
+    const mode = groupMode.value;
 
     if (parsedNames.length === 0) {
         showError("Silakan upload file .txt terlebih dahulu.");
         return;
     }
-    if (isNaN(groupCount) || groupCount < 1) {
-        showError("Masukkan jumlah kelompok yang valid (minimal 1).");
+    if (isNaN(inputValue) || inputValue < 1) {
+        showError("Masukkan angka yang valid (minimal 1).");
         return;
     }
-    if (groupCount > parsedNames.length) {
+    if (mode === 'groupCount' && inputValue > parsedNames.length) {
         showError("Jumlah kelompok tidak boleh lebih dari jumlah nama yang ada.");
+        return;
+    }
+    if (mode === 'memberCount' && inputValue > parsedNames.length) {
+        showError("Jumlah anggota per kelompok tidak boleh lebih besar dari total nama.");
         return;
     }
 
     hideError();
     startLoadingState();
 
-    // Jeda 1.2 detik untuk animasi loading sebelum memunculkan hasil
     setTimeout(() => {
-        processAndRenderGroups(groupCount);
+        processAndRenderGroups(inputValue, mode);
         stopLoadingState();
     }, 1200);
 });
@@ -133,7 +154,7 @@ function startLoadingState() {
     loadingIcon.classList.remove('hidden');
     generateText.textContent = "Mengacak Data...";
     
-    resultsContainer.classList.add('opacity-30'); // Buat hasil redup saat proses acak ulang
+    resultsContainer.classList.add('opacity-30');
 }
 
 function stopLoadingState() {
@@ -147,17 +168,28 @@ function stopLoadingState() {
     resultsContainer.classList.remove('opacity-30');
 }
 
-function processAndRenderGroups(groupCount) {
+function processAndRenderGroups(inputValue, mode) {
     let shuffledNames = [...parsedNames];
     for (let i = shuffledNames.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [shuffledNames[i], shuffledNames[j]] = [shuffledNames[j], shuffledNames[i]];
     }
 
-    const groups = Array.from({ length: groupCount }, () => []);
-    shuffledNames.forEach((name, index) => {
-        groups[index % groupCount].push(name);
-    });
+    let groups = [];
+
+    // PERHITUNGAN BERDASARKAN MODE YANG DIPILIH
+    if (mode === 'groupCount') {
+        // Mode 1: Dibagi rata ke sejumlah N kelompok (Round-Robin)
+        groups = Array.from({ length: inputValue }, () => []);
+        shuffledNames.forEach((name, index) => {
+            groups[index % inputValue].push(name);
+        });
+    } else if (mode === 'memberCount') {
+        // Mode 2: Dipotong-potong sejumlah N anggota per kelompok
+        for (let i = 0; i < shuffledNames.length; i += inputValue) {
+            groups.push(shuffledNames.slice(i, i + inputValue));
+        }
+    }
 
     resultsContainer.innerHTML = "";
     generatedTextOutput = "";
@@ -176,10 +208,7 @@ function processAndRenderGroups(groupCount) {
         });
 
         const card = document.createElement('div');
-        // Tambahkan class opacity-0 dan animate-fade-in-up agar muncul elegan dari bawah
         card.className = "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-slate-200 opacity-0 animate-fade-in-up";
-        
-        // Delay animasi per kartu (stagger effect)
         card.style.animationDelay = `${index * 0.1}s`; 
 
         card.innerHTML = `
@@ -200,8 +229,9 @@ function processAndRenderGroups(groupCount) {
     downloadExcelBtn.classList.remove('hidden');
 }
 
+
 // ==========================================
-// 5. FITUR COPY TEKS
+// 6. FITUR COPY TEKS
 // ==========================================
 copyBtn.addEventListener('click', () => {
     if (generatedTextOutput) {
@@ -213,8 +243,9 @@ copyBtn.addEventListener('click', () => {
     }
 });
 
+
 // ==========================================
-// 6. FITUR DOWNLOAD EXCEL
+// 7. FITUR DOWNLOAD EXCEL
 // ==========================================
 downloadExcelBtn.addEventListener('click', () => {
     if (generatedGroupsData.length === 0) return;
@@ -239,8 +270,9 @@ downloadExcelBtn.addEventListener('click', () => {
     XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
+
 // ==========================================
-// 7. FITUR RESET DATA
+// 8. FITUR RESET DATA
 // ==========================================
 resetBtn.addEventListener('click', () => {
     parsedNames = [];
@@ -250,7 +282,13 @@ resetBtn.addEventListener('click', () => {
     fileInput.value = ""; 
     fileStatus.textContent = "Belum ada file terpilih";
     fileStatus.classList.remove('text-brand-600', 'font-medium');
+    
+    // Reset form ke default
+    groupMode.value = "groupCount";
     groupCountInput.value = "";
+    groupCountInput.placeholder = "Contoh: 5";
+    groupHelpText.textContent = "Tentukan sistem ingin membuat berapa kelompok.";
+    
     hideError();
 
     nameCount.textContent = "0 nama";
@@ -269,8 +307,9 @@ resetBtn.addEventListener('click', () => {
     downloadExcelBtn.classList.add('hidden');
 });
 
+
 // ==========================================
-// 8. FITUR DRAG AND DROP (DIPERBAIKI)
+// 9. FITUR DRAG AND DROP (DIPERBAIKI)
 // ==========================================
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     window.addEventListener(eventName, (e) => {
