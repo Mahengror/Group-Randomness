@@ -18,10 +18,11 @@ const copyBtn = document.getElementById('copyBtn');
 const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const toast = document.getElementById('toast');
 const dropZone = document.getElementById('dropZone');
+
+// Element DOM untuk Animasi Tombol
 const generateIcon = document.getElementById('generateIcon');
 const loadingIcon = document.getElementById('loadingIcon');
 const generateText = document.getElementById('generateText');
-
 
 // ==========================================
 // 2. FUNGSI BANTUAN UI
@@ -45,9 +46,8 @@ function showToast() {
     }, 3000);
 }
 
-
 // ==========================================
-// 3. LOGIKA MEMBACA FILE (UPLOAD) - DENGAN PENCEGAH DUPLIKAT
+// 3. LOGIKA MEMBACA FILE (UPLOAD) + PENCEGAH DUPLIKAT
 // ==========================================
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -57,18 +57,15 @@ fileInput.addEventListener('change', (e) => {
     reader.onload = function(event) {
         const text = event.target.result;
         
-        // 1. Ambil semua nama (termasuk yang ganda)
+        // Ambil nama dan hapus baris kosong
         const rawNames = text.split(/\r?\n/).map(name => name.trim()).filter(name => name !== "");
         
-        // 2. Hapus duplikat otomatis menggunakan Set()
+        // Hapus duplikat otomatis menggunakan Set()
         parsedNames = [...new Set(rawNames)];
-        
-        // 3. Hitung jumlah duplikat yang terdeteksi
         const duplicateCount = rawNames.length - parsedNames.length;
 
-        // 4. Tampilkan pemberitahuan kecil di UI jika ada duplikat yang dihapus
         if (duplicateCount > 0) {
-            fileStatus.textContent = `${file.name} (${duplicateCount} nama ganda dihapus otomatis)`;
+            fileStatus.textContent = `${file.name} (${duplicateCount} duplikat dihapus)`;
         } else {
             fileStatus.textContent = file.name;
         }
@@ -99,14 +96,12 @@ function updateNamePreview() {
     });
 }
 
-
 // ==========================================
 // 4. LOGIKA PENGACAKAN KELOMPOK (DENGAN ANIMASI)
 // ==========================================
 generateBtn.addEventListener('click', () => {
     const groupCount = parseInt(groupCountInput.value);
 
-    // Validasi input
     if (parsedNames.length === 0) {
         showError("Silakan upload file .txt terlebih dahulu.");
         return;
@@ -121,31 +116,26 @@ generateBtn.addEventListener('click', () => {
     }
 
     hideError();
-    
-    // MULAI ANIMASI LOADING
     startLoadingState();
 
-    // Beri jeda 1.2 detik (1200ms) untuk efek "mengacak" sebelum memunculkan hasil
+    // Jeda 1.2 detik untuk animasi loading sebelum memunculkan hasil
     setTimeout(() => {
         processAndRenderGroups(groupCount);
         stopLoadingState();
     }, 1200);
 });
 
-// Fungsi untuk mengubah tombol jadi mode Loading
 function startLoadingState() {
-    generateBtn.disabled = true; // Matikan tombol agar tidak bisa di-spam klik
+    generateBtn.disabled = true;
     generateBtn.classList.add('opacity-80', 'cursor-not-allowed');
     
-    generateIcon.classList.add('hidden'); // Sembunyikan ikon panah acak
-    loadingIcon.classList.remove('hidden'); // Munculkan spinner berputar
-    generateText.textContent = "Mengacak Data..."; // Ganti teks
+    generateIcon.classList.add('hidden');
+    loadingIcon.classList.remove('hidden');
+    generateText.textContent = "Mengacak Data...";
     
-    // Opsional: Beri efek transparan pada kontainer hasil yang lama jika pengguna mengacak ulang
-    resultsContainer.classList.add('opacity-50', 'transition-opacity');
+    resultsContainer.classList.add('opacity-30'); // Buat hasil redup saat proses acak ulang
 }
 
-// Fungsi untuk mengembalikan tombol ke semula
 function stopLoadingState() {
     generateBtn.disabled = false;
     generateBtn.classList.remove('opacity-80', 'cursor-not-allowed');
@@ -154,8 +144,7 @@ function stopLoadingState() {
     generateIcon.classList.remove('hidden');
     generateText.textContent = "Bagi Kelompok";
     
-    // Hilangkan efek transparan pada kontainer hasil
-    resultsContainer.classList.remove('opacity-50');
+    resultsContainer.classList.remove('opacity-30');
 }
 
 function processAndRenderGroups(groupCount) {
@@ -183,12 +172,16 @@ function processAndRenderGroups(groupCount) {
 
         let listHTML = "";
         group.forEach(name => {
-            listHTML += `<li class="flex items-start gap-2 before:content-['•'] before:text-brand-400 before:font-bold text-sm text-slate-700 animate-fade-in">${name}</li>`;
+            listHTML += `<li class="flex items-start gap-2 before:content-['•'] before:text-brand-400 before:font-bold text-sm text-slate-700">${name}</li>`;
         });
 
         const card = document.createElement('div');
-        // Tambahkan efek animasi muncul ke atas (animate-fade-in-up)
-        card.className = "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col border border-slate-200 transform transition-all duration-500 hover:-translate-y-1";
+        // Tambahkan class opacity-0 dan animate-fade-in-up agar muncul elegan dari bawah
+        card.className = "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-slate-200 opacity-0 animate-fade-in-up";
+        
+        // Delay animasi per kartu (stagger effect)
+        card.style.animationDelay = `${index * 0.1}s`; 
+
         card.innerHTML = `
             <div class="bg-brand-50 border-b border-slate-100 px-5 py-3 flex items-center justify-between">
                 <h3 class="font-bold text-brand-700">Kelompok ${index + 1}</h3>
@@ -200,11 +193,7 @@ function processAndRenderGroups(groupCount) {
                 </ul>
             </div>
         `;
-        
-        // Efek stagger (muncul bergantian)
-        setTimeout(() => {
-            resultsContainer.appendChild(card);
-        }, index * 100); // Setiap kartu muncul jeda 0.1 detik
+        resultsContainer.appendChild(card);
     });
 
     copyBtn.classList.remove('hidden');
@@ -223,7 +212,6 @@ copyBtn.addEventListener('click', () => {
         });
     }
 });
-
 
 // ==========================================
 // 6. FITUR DOWNLOAD EXCEL
@@ -251,7 +239,6 @@ downloadExcelBtn.addEventListener('click', () => {
     XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
-
 // ==========================================
 // 7. FITUR RESET DATA
 // ==========================================
@@ -275,14 +262,12 @@ resetBtn.addEventListener('click', () => {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
             </svg>
             <p>Belum ada kelompok yang dibagikan.</p>
-            <p class="text-sm">Silakan upload daftar nama dan klik "Bagi Kelompok".</p>
         </div>
     `;
 
     copyBtn.classList.add('hidden');
     downloadExcelBtn.classList.add('hidden');
 });
-
 
 // ==========================================
 // 8. FITUR DRAG AND DROP (DIPERBAIKI)
@@ -317,8 +302,6 @@ dropZone.addEventListener('drop', (e) => {
             const dataTransfer = new DataTransfer();
             dataTransfer.items.add(file);
             fileInput.files = dataTransfer.files;
-            
-            // Picu perubahan agar fungsi baca file berjalan
             fileInput.dispatchEvent(new Event('change'));
         } else {
             showError("Format file tidak didukung. Harap upload file berekstensi .txt");
