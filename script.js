@@ -18,6 +18,9 @@ const copyBtn = document.getElementById('copyBtn');
 const downloadExcelBtn = document.getElementById('downloadExcelBtn');
 const toast = document.getElementById('toast');
 const dropZone = document.getElementById('dropZone');
+const generateIcon = document.getElementById('generateIcon');
+const loadingIcon = document.getElementById('loadingIcon');
+const generateText = document.getElementById('generateText');
 
 
 // ==========================================
@@ -98,11 +101,12 @@ function updateNamePreview() {
 
 
 // ==========================================
-// 4. LOGIKA PENGACAKAN KELOMPOK
+// 4. LOGIKA PENGACAKAN KELOMPOK (DENGAN ANIMASI)
 // ==========================================
 generateBtn.addEventListener('click', () => {
     const groupCount = parseInt(groupCountInput.value);
 
+    // Validasi input
     if (parsedNames.length === 0) {
         showError("Silakan upload file .txt terlebih dahulu.");
         return;
@@ -117,8 +121,42 @@ generateBtn.addEventListener('click', () => {
     }
 
     hideError();
-    processAndRenderGroups(groupCount);
+    
+    // MULAI ANIMASI LOADING
+    startLoadingState();
+
+    // Beri jeda 1.2 detik (1200ms) untuk efek "mengacak" sebelum memunculkan hasil
+    setTimeout(() => {
+        processAndRenderGroups(groupCount);
+        stopLoadingState();
+    }, 1200);
 });
+
+// Fungsi untuk mengubah tombol jadi mode Loading
+function startLoadingState() {
+    generateBtn.disabled = true; // Matikan tombol agar tidak bisa di-spam klik
+    generateBtn.classList.add('opacity-80', 'cursor-not-allowed');
+    
+    generateIcon.classList.add('hidden'); // Sembunyikan ikon panah acak
+    loadingIcon.classList.remove('hidden'); // Munculkan spinner berputar
+    generateText.textContent = "Mengacak Data..."; // Ganti teks
+    
+    // Opsional: Beri efek transparan pada kontainer hasil yang lama jika pengguna mengacak ulang
+    resultsContainer.classList.add('opacity-50', 'transition-opacity');
+}
+
+// Fungsi untuk mengembalikan tombol ke semula
+function stopLoadingState() {
+    generateBtn.disabled = false;
+    generateBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+    
+    loadingIcon.classList.add('hidden');
+    generateIcon.classList.remove('hidden');
+    generateText.textContent = "Bagi Kelompok";
+    
+    // Hilangkan efek transparan pada kontainer hasil
+    resultsContainer.classList.remove('opacity-50');
+}
 
 function processAndRenderGroups(groupCount) {
     let shuffledNames = [...parsedNames];
@@ -134,7 +172,7 @@ function processAndRenderGroups(groupCount) {
 
     resultsContainer.innerHTML = "";
     generatedTextOutput = "";
-    generatedGroupsData = groups; // Simpan untuk Excel
+    generatedGroupsData = groups; 
 
     groups.forEach((group, index) => {
         generatedTextOutput += `Kelompok ${index + 1} - ${group.length} orang\n`;
@@ -145,11 +183,12 @@ function processAndRenderGroups(groupCount) {
 
         let listHTML = "";
         group.forEach(name => {
-            listHTML += `<li class="flex items-start gap-2 before:content-['•'] before:text-brand-400 before:font-bold text-sm text-slate-700">${name}</li>`;
+            listHTML += `<li class="flex items-start gap-2 before:content-['•'] before:text-brand-400 before:font-bold text-sm text-slate-700 animate-fade-in">${name}</li>`;
         });
 
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col border border-slate-200";
+        // Tambahkan efek animasi muncul ke atas (animate-fade-in-up)
+        card.className = "bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col border border-slate-200 transform transition-all duration-500 hover:-translate-y-1";
         card.innerHTML = `
             <div class="bg-brand-50 border-b border-slate-100 px-5 py-3 flex items-center justify-between">
                 <h3 class="font-bold text-brand-700">Kelompok ${index + 1}</h3>
@@ -161,13 +200,16 @@ function processAndRenderGroups(groupCount) {
                 </ul>
             </div>
         `;
-        resultsContainer.appendChild(card);
+        
+        // Efek stagger (muncul bergantian)
+        setTimeout(() => {
+            resultsContainer.appendChild(card);
+        }, index * 100); // Setiap kartu muncul jeda 0.1 detik
     });
 
     copyBtn.classList.remove('hidden');
     downloadExcelBtn.classList.remove('hidden');
 }
-
 
 // ==========================================
 // 5. FITUR COPY TEKS
