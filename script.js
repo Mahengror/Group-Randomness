@@ -1,6 +1,4 @@
-// ==========================================
 // 1. DEKLARASI VARIABEL GLOBAL & DOM
-// ==========================================
 let parsedNames = [];
 let generatedGroupsData = [];
 let generatedTextOutput = "";
@@ -28,9 +26,7 @@ const generateIcon = document.getElementById('generateIcon');
 const loadingIcon = document.getElementById('loadingIcon');
 const generateText = document.getElementById('generateText');
 
-// ==========================================
 // 2. FUNGSI BANTUAN UI
-// ==========================================
 function showError(msg) {
     errorMessage.textContent = msg;
     errorMessage.classList.remove('hidden');
@@ -48,9 +44,7 @@ function showToast() {
     }, 3000);
 }
 
-// ==========================================
 // 3. LOGIKA DROPDOWN MODE KELOMPOK
-// ==========================================
 groupMode.addEventListener('change', () => {
     groupCountInput.value = "";
     if (groupMode.value === 'groupCount') {
@@ -75,9 +69,7 @@ groupMode.addEventListener('change', () => {
     hideError();
 });
 
-// ==========================================
 // 4. LOGIKA UPLOAD & HAPUS NAMA (INLINE DELETE)
-// ==========================================
 fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -152,9 +144,7 @@ window.removeName = function(index) {
     }
 };
 
-// ==========================================
 // 5. PENGACAKAN KELOMPOK (DENGAN DRAG & DROP UI)
-// ==========================================
 generateBtn.addEventListener('click', () => {
     const inputValue = parseInt(groupCountInput.value);
     const mode = groupMode.value;
@@ -221,7 +211,7 @@ function processAndRenderGroups(inputValue, mode) {
         });
 
         const card = document.createElement('div');
-        // Tambahkan w-full ke class
+
         card.className = "group-card w-full bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-slate-200 opacity-0 animate-fade-in-up transition-all";
         card.style.animationDelay = `${index * 0.1}s`; 
         card.innerHTML = `
@@ -246,9 +236,7 @@ function processAndRenderGroups(inputValue, mode) {
     attachGroupDragAndDrop(); 
 }
 
-// ==========================================
 // 6. LOGIKA DRAG & DROP & SINKRONISASI
-// ==========================================
 function attachGroupDragAndDrop() {
     const draggables = document.querySelectorAll('.draggable-item');
     const dropZones = document.querySelectorAll('.drop-zone');
@@ -306,9 +294,7 @@ function syncDataFromUI() {
     });
 }
 
-// ==========================================
 // 7. COPY & EXCEL
-// ==========================================
 copyBtn.addEventListener('click', () => {
     if (generatedTextOutput) {
         navigator.clipboard.writeText(generatedTextOutput.trim()).then(() => {
@@ -337,9 +323,7 @@ downloadExcelBtn.addEventListener('click', () => {
     XLSX.writeFile(workbook, "Hasil_Pembagian_Kelompok.xlsx");
 });
 
-// ==========================================
 // 8. RESET DATA
-// ==========================================
 resetBtn.addEventListener('click', () => {
     parsedNames = [];
     generatedGroupsData = [];
@@ -370,9 +354,7 @@ resetBtn.addEventListener('click', () => {
     downloadExcelBtn.classList.add('hidden');
 });
 
-// ==========================================
 // 9. UPLOAD FILE DRAG AND DROP (AREA KIRI)
-// ==========================================
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
     window.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
 });
